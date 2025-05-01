@@ -60,11 +60,13 @@ app.post('/zeffy-webhook', async (req, res) => {
     }
 });
 
-if (process.env.MODE === 'production-vercel') {
-    module.exports = app;
-}
-else {
-    app.listen(process.env.PORT, () => {
-        console.log(`App is running on port ${process.env.PORT}`)
-    })
+// always export for both local and serverless
+module.exports = app;
+
+// if this file was run directly (i.e. `node app.js`), start the server
+if (require.main === module) {
+    const port = process.env.PORT || 3000;
+    app.listen(port, () => {
+        console.log(`App is running on port ${port}`);
+    });
 }
