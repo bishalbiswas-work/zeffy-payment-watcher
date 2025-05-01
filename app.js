@@ -27,7 +27,32 @@ app.use(cors({
 
 
 // Initate DB connection
-connectDB();
+// connectDB();
+
+
+// GLOBAL cache
+let isConnected = false;
+async function ensureDB() {
+    if (isConnected) return;
+    await mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PWD}@${process.env.DB_CLUSTER}/${process.env.DB_NAME}?retryWrites=true&w=majority`, {
+        // fail fast if DB unreachable
+        serverSelectionTimeoutMS: 5000,
+    });
+    isConnected = true;
+    console.log('⚡️ MongoDB connected');
+}
+
+// wrap every request to await DB connection first
+app.use(async (req, res, next) => {
+    try {
+        await ensureDB();
+        next();
+    } catch (err) {
+        console.error('DB connection error:', err);
+        res.status(500).send('Database connection failed');
+    }
+});
+
 
 app.get('/', (req, res) => {
     res.status(200).json({ message: 'App is working' });
