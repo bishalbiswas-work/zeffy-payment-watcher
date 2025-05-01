@@ -29,7 +29,9 @@ app.use(cors({
 // Initate DB connection
 connectDB();
 
-
+app.get('/', (req, res) => {
+    res.status(200).json({ message: 'App is working' });
+})
 // Test
 app.get('/health', (req, res) => {
     res.status(200).json({ message: 'App is working' });
@@ -58,7 +60,11 @@ app.post('/zeffy-webhook', async (req, res) => {
     }
 });
 
-
-app.listen(process.env.PORT, () => {
-    console.log(`App is running on port ${process.env.PORT}`)
-})
+if (process.env.MODE === 'production-vercel') {
+    module.exports = app;
+}
+else {
+    app.listen(process.env.PORT, () => {
+        console.log(`App is running on port ${process.env.PORT}`)
+    })
+}
